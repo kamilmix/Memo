@@ -10,31 +10,75 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_TAKE_PHOTO = 1;
+    public static final String EXTRA_MESSAGE = "com.mucha.kamil.memo.MESSAGE.PLAY";
 
 
     ImageView mImageView;
     String mCurrentPhotoPath;
+    Button buttonPhotos;
+    ArrayList<String> photosPathsList;
+    LinearLayout linearLayout;
+
+    ArrayList<Bitmap> photosBitmaps;
+
 
 
     ImageView imageView;
     boolean visibility;
+    private View.OnClickListener buttonPhotosOnClickLister = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            buttonPhotosClicked();
+        }
+    };
+
+    private void buttonPhotosClicked() {
+       // Intent intent = new Intent(this, PhotosActivity.class);
+        //startActivity(intent);
+
+        for(String photo : photosPathsList){
+            ImageView image = new ImageView(this);
+            image.setLayoutParams(new android.view.ViewGroup.LayoutParams(200,200));
+
+            image.setMaxHeight(150);
+            image.setMaxWidth(180);
+            image.setImageBitmap(setPicA(photo, 200, 200 ));
+
+            // Adds the view to the layout
+            linearLayout.addView(image);
+        }
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mImageView = findViewById(R.id.imageView);
         imageView = findViewById(R.id.imageView2);
+        buttonPhotos = findViewById(R.id.buttonPhotosActivity);
+        buttonPhotos.setOnClickListener(buttonPhotosOnClickLister);
+        linearLayout = findViewById(R.id.linearLayout);
         visibility= true;
+
+        photosPathsList = new ArrayList<>();
+        photosBitmaps = new ArrayList<>();
+
+
     }
 
     public void onClickImage(View v){
@@ -48,13 +92,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            // Bundle extras = data.getExtras();
-//            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            //  mImageView.setImageBitmap(imageBitmap);
+           //  Bundle extras = data.getExtras();
+            //Bitmap imageBitmap = (Bitmap) extras.get("data");
+           // mImageView.setImageBitmap(imageBitmap);
+           // photosBitmaps.add(imageBitmap);
+            photosPathsList.add(mCurrentPhotoPath);
             setPic();
+
         }
     }
 
@@ -119,12 +168,49 @@ public class MainActivity extends AppCompatActivity {
 
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
         mImageView.setImageBitmap(bitmap);
+
+    }
+
+    private Bitmap setPicA(String mCurrentPhotoPath, int width, int height) {
+        // Get the dimensions of the View
+       // int targetW = mImageView.getWidth();
+       // int targetH = mImageView.getHeight();
+        int targetW = width;
+        int targetH = height;
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        //mImageView.setImageBitmap(bitmap);
+        return bitmap;
+
     }
 
     public void onClickButtonTakePhoto(View view) {
         dispatchTakePictureIntent();
     }
+
+    public void onClickPlay(View view) {
+        Intent intent = new Intent(this, PhotosActivity.class);
+        intent.putStringArrayListExtra(EXTRA_MESSAGE, photosPathsList);
+        startActivity(intent);
+    }
+
 }
+
 
 
 
