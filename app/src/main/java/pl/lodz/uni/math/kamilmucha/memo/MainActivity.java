@@ -37,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
+
     ImageView imageView;
     boolean visibility;
     private View.OnClickListener buttonPhotosOnClickLister = new View.OnClickListener() {
@@ -76,9 +78,22 @@ public class MainActivity extends AppCompatActivity {
         visibility= true;
 
         photosPathsList = new ArrayList<>();
+        setPhotosPaths();
+
         photosBitmaps = new ArrayList<>();
 
 
+    }
+
+    private void setPhotosPaths() {
+        photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232900_1353253075041324650.jpg");
+        photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232911_7516277580188711580.jpg");
+        photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232919_7853124197918384117.jpg");
+        photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232926_5093673749734754174.jpg");
+        photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232932_5850405677871970940.jpg");
+        photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232938_2119335713772628882.jpg");
+        photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232946_444297017623842049.jpg");
+        photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232954_7617219511505937433.jpg");
     }
 
     public void onClickImage(View v){
@@ -204,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickPlay(View view) {
-        Intent intent = new Intent(this, PhotosActivity.class);
+        Intent intent = new Intent(this, GameActivity.class);
         intent.putStringArrayListExtra(EXTRA_MESSAGE, photosPathsList);
         startActivity(intent);
     }

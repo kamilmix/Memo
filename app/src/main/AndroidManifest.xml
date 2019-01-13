@@ -30,10 +30,13 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".PhotosActivity"></activity>
+        <activity android:name=".PhotosActivity" />
+        <activity android:name=".GameActivity" />
+        <activity android:name=".MemoryGame" />
+        <activity android:name=".PlayActivity"></activity>
     </application>
 
 </manifest>
