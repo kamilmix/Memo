@@ -3,10 +3,14 @@ package pl.lodz.uni.math.kamilmucha.memo;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -37,7 +41,7 @@ public class ImageAdapter extends BaseAdapter {
 
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
+        final ImageView imageView;
         if (convertView == null) {
             // if it's not recycled, initialize some attributes
             imageView = new ImageView(mContext);
@@ -49,8 +53,34 @@ public class ImageAdapter extends BaseAdapter {
         }
 
        // imageView.setImageResource(mThumbIds[position]);
-        imageView.setImageBitmap(setPicA(photosPathsList.get(position),200,200));
+       Bitmap bitmap = setPicA(photosPathsList.get(position),200,200);
+        imageView.setImageBitmap(bitmap);
+
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    imageView.setImageResource(R.drawable.ic_brightness_1_black_24dp);
+
+            }
+        });
+
         return imageView;
+/*
+        ImageButton button;
+
+        if(convertView == null){
+            button = new ImageButton(mContext);
+            button.setLayoutParams(new ViewGroup.LayoutParams(200,200));
+            button.setPadding(8, 8, 8, 8);
+        }
+        else{
+            button = (ImageButton) convertView;
+        }
+
+        button.setImageBitmap(setPicA(photosPathsList.get(position),200,200));
+        button.bringToFront();
+
+        return button;*/
     }
 
     private Bitmap setPicA(String mCurrentPhotoPath, int width, int height) {

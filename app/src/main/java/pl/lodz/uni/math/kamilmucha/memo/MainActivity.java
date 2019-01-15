@@ -1,5 +1,6 @@
 package pl.lodz.uni.math.kamilmucha.memo;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -7,13 +8,16 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,25 +26,23 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    static final int REQUEST_TAKE_PHOTO = 1;
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_TAKE_PHOTO = 1;
+    private static final int PHOTO_HEIGHT = 500;
+    private static final int PHOTO_WIDTH = 1000;
+
     public static final String EXTRA_MESSAGE = "com.mucha.kamil.memo.MESSAGE.PLAY";
+    private static final String TAG = MainActivity.class.getSimpleName();
 
+    private ImageView mImageView;
+    private String mCurrentPhotoPath;
+    private Button buttonPhotos;
+    private ArrayList<String> photosPathsList;
+    private LinearLayout linearLayout;
+    private TextView photosCount;
 
-    ImageView mImageView;
-    String mCurrentPhotoPath;
-    Button buttonPhotos;
-    ArrayList<String> photosPathsList;
-    LinearLayout linearLayout;
+    private ArrayList<Bitmap> photosBitmaps;
 
-    ArrayList<Bitmap> photosBitmaps;
-
-
-
-
-
-    ImageView imageView;
-    boolean visibility;
     private View.OnClickListener buttonPhotosOnClickLister = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -49,43 +51,36 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void buttonPhotosClicked() {
-       // Intent intent = new Intent(this, PhotosActivity.class);
-        //startActivity(intent);
-
-        for(String photo : photosPathsList){
-            ImageView image = new ImageView(this);
-            image.setLayoutParams(new android.view.ViewGroup.LayoutParams(200,200));
-
-            image.setMaxHeight(150);
-            image.setMaxWidth(180);
-            image.setImageBitmap(setPicA(photo, 200, 200 ));
-
-            // Adds the view to the layout
-            linearLayout.addView(image);
+        setSamplePhotosPaths();
+        for (String photo : photosPathsList) {
+            linearLayout.addView(createPhotoImageView(photo));
         }
-
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mImageView = findViewById(R.id.imageView);
-        imageView = findViewById(R.id.imageView2);
+
         buttonPhotos = findViewById(R.id.buttonPhotosActivity);
         buttonPhotos.setOnClickListener(buttonPhotosOnClickLister);
         linearLayout = findViewById(R.id.linearLayout);
-        visibility= true;
+        photosCount = findViewById(R.id.textViewPhotosCount);
 
         photosPathsList = new ArrayList<>();
-        setPhotosPaths();
-
         photosBitmaps = new ArrayList<>();
-
 
     }
 
-    private void setPhotosPaths() {
+    private void updatePhotosCount() {
+      //  photosCount.setText(photosPathsList.size());
+        String size = String.valueOf(photosPathsList.size());
+        photosCount.setText(size);
+    }
+
+
+
+    private void setSamplePhotosPaths() {
         photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232900_1353253075041324650.jpg");
         photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232911_7516277580188711580.jpg");
         photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232919_7853124197918384117.jpg");
@@ -94,32 +89,27 @@ public class MainActivity extends AppCompatActivity {
         photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232938_2119335713772628882.jpg");
         photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232946_444297017623842049.jpg");
         photosPathsList.add("/storage/emulated/0/Android/data/pl.lodz.uni.math.kamilmucha.memo/files/Pictures/JPEG_20190113_232954_7617219511505937433.jpg");
+        updatePhotosCount();
     }
-
-    public void onClickImage(View v){
-        if(visibility)
-        imageView.setImageResource(R.drawable.ic_brightness_1_black_24dp);
-        else
-            imageView.setImageResource(R.drawable.ic_action_name);
-
-        visibility = !visibility;
-
-    }
-
-
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-           //  Bundle extras = data.getExtras();
-            //Bitmap imageBitmap = (Bitmap) extras.get("data");
-           // mImageView.setImageBitmap(imageBitmap);
-           // photosBitmaps.add(imageBitmap);
             photosPathsList.add(mCurrentPhotoPath);
-            setPic();
-
+            linearLayout.addView(createPhotoImageView(mCurrentPhotoPath));
+            updatePhotosCount();
         }
+    }
+
+    private View createPhotoImageView(String mCurrentPhotoPath) {
+        ImageView image = new ImageView(this);
+        image.setLayoutParams(new android.view.ViewGroup.LayoutParams(PHOTO_WIDTH, PHOTO_HEIGHT));
+        image.setPadding(8,8,8,8);
+        image.setImageBitmap(photoToBitmap(mCurrentPhotoPath));
+
+        return image;
+
     }
 
 
@@ -161,6 +151,27 @@ public class MainActivity extends AppCompatActivity {
         return image;
     }
 
+    private Bitmap photoToBitmap(String mCurrentPhotoPath) {
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW / MainActivity.PHOTO_WIDTH, photoH / MainActivity.PHOTO_HEIGHT);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        return BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+
+    }
+
     private void setPic() {
         // Get the dimensions of the View
         int targetW = mImageView.getWidth();
@@ -174,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
         int photoH = bmOptions.outHeight;
 
         // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
 
         // Decode the image file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = false;
@@ -186,42 +197,32 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private Bitmap setPicA(String mCurrentPhotoPath, int width, int height) {
-        // Get the dimensions of the View
-       // int targetW = mImageView.getWidth();
-       // int targetH = mImageView.getHeight();
-        int targetW = width;
-        int targetH = height;
-
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        //mImageView.setImageBitmap(bitmap);
-        return bitmap;
-
-    }
-
     public void onClickButtonTakePhoto(View view) {
         dispatchTakePictureIntent();
     }
 
     public void onClickPlay(View view) {
-        Intent intent = new Intent(this, GameActivity.class);
-        intent.putStringArrayListExtra(EXTRA_MESSAGE, photosPathsList);
-        startActivity(intent);
+        if(photosPathsList.size() == 8){
+            Intent intent = new Intent(this, GameActivity.class);
+            intent.putStringArrayListExtra(EXTRA_MESSAGE, photosPathsList);
+            startActivity(intent);
+        }
+        else {
+            alertNotEnoughPhotos();
+        }
+    }
+
+    private void alertNotEnoughPhotos() {
+
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle("NOT ENOUGH PHOTOS")
+                .setMessage("You must take 8 photos to can play.")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                        dialog.cancel();
+                    }
+                }).show();
     }
 
 }
