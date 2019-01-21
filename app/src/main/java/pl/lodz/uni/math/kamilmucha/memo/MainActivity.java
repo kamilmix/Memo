@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "com.mucha.kamil.memo.MESSAGE.PLAY";
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private ImageView mImageView;
     private String mCurrentPhotoPath;
     private Button buttonPhotos;
     private ArrayList<String> photosPathsList;
@@ -73,11 +72,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updatePhotosCount() {
-      //  photosCount.setText(photosPathsList.size());
         String size = String.valueOf(photosPathsList.size());
         photosCount.setText(size);
     }
-
 
 
     private void setSamplePhotosPaths() {
@@ -105,11 +102,10 @@ public class MainActivity extends AppCompatActivity {
     private View createPhotoImageView(String mCurrentPhotoPath) {
         ImageView image = new ImageView(this);
         image.setLayoutParams(new android.view.ViewGroup.LayoutParams(PHOTO_WIDTH, PHOTO_HEIGHT));
-        image.setPadding(8,8,8,8);
+        image.setPadding(8, 8, 8, 8);
         image.setImageBitmap(photoToBitmap(mCurrentPhotoPath));
 
         return image;
-
     }
 
 
@@ -145,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
-
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
@@ -172,42 +167,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setPic() {
-        // Get the dimensions of the View
-        int targetW = mImageView.getWidth();
-        int targetH = mImageView.getHeight();
-
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        mImageView.setImageBitmap(bitmap);
-
-    }
-
-    public void onClickButtonTakePhoto(View view) {
+    protected void onClickButtonTakePhoto(View view) {
         dispatchTakePictureIntent();
     }
 
-    public void onClickPlay(View view) {
-        if(photosPathsList.size() == 8){
+    protected void onClickPlay(View view) {
+        if (photosPathsList.size() == 8) {
             Intent intent = new Intent(this, GameActivity.class);
             intent.putStringArrayListExtra(EXTRA_MESSAGE, photosPathsList);
             startActivity(intent);
-        }
-        else {
+        } else {
             alertNotEnoughPhotos();
         }
     }
@@ -219,7 +188,6 @@ public class MainActivity extends AppCompatActivity {
                 .setMessage("You must take 8 photos to can play.")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-
                         dialog.cancel();
                     }
                 }).show();

@@ -20,11 +20,11 @@ public class GameActivity extends AppCompatActivity {
     private static final int PHOTO_HEIGHT = 250;
 
     private ArrayList<Bitmap> photoBitmaps;
-    private ImageView curView = null;
+    private ImageView currentView = null;
     private int countPair = 0;
 
-    private int[] pos = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7};
-    private int currentPos = -1;
+    private int[] position = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7};
+    private int currentPosition = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,9 +34,9 @@ public class GameActivity extends AppCompatActivity {
         Intent intent = getIntent();
         ArrayList<String> photoFilePaths = intent.getStringArrayListExtra(MainActivity.EXTRA_MESSAGE);
         photoBitmaps = convertListToBitmap(photoFilePaths);
-        shuffleArray(pos);
+        shuffleArray(position);
 
-        ImageAdapter2 imageAdapter = new ImageAdapter2(this);
+        ImageAdapter imageAdapter = new ImageAdapter(this);
         GridView gridView = findViewById(R.id.gridviewAB);
         gridView.setAdapter(imageAdapter);
         gridView.setOnItemClickListener(gridViewOnItemClickListener);
@@ -55,41 +55,38 @@ public class GameActivity extends AppCompatActivity {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (currentPos < 0) {
-                currentPos = position;
-                curView = (ImageView) view;
-                Bitmap bitmap = photoBitmaps.get(pos[position]);
+            if (currentPosition < 0) {
+                currentPosition = position;
+                currentView = (ImageView) view;
+                Bitmap bitmap = photoBitmaps.get(GameActivity.this.position[position]);
                 ((ImageView) view).setImageBitmap(bitmap);
 
             } else {
-                if (currentPos == position) {
+                if (currentPosition == position) {
                     ((ImageView) view).setImageResource(R.drawable.ic_photo_black_24dp);
-                } else if (pos[currentPos] != pos[position]) {
-
+                } else if (GameActivity.this.position[currentPosition] != GameActivity.this.position[position]) {
                     Toast.makeText(GameActivity.this, "Not Match!", Toast.LENGTH_LONG).show();
 
-                    Bitmap bitmap = photoBitmaps.get(pos[position]);
+                    Bitmap bitmap = photoBitmaps.get(GameActivity.this.position[position]);
                     ((ImageView) view).setImageBitmap(bitmap);
                     final View viewHandler = view;
-
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-
                             ((ImageView) viewHandler).setImageResource(R.drawable.ic_photo_black_24dp);
-                            curView.setImageResource(R.drawable.ic_photo_black_24dp);
+                            currentView.setImageResource(R.drawable.ic_photo_black_24dp);
                         }
                     }, 800); // Millisecond 1000 = 1 sec
 
                 } else {
-                    Bitmap bitmap = photoBitmaps.get(pos[position]);
+                    Bitmap bitmap = photoBitmaps.get(GameActivity.this.position[position]);
                     ((ImageView) view).setImageBitmap(bitmap);
                     countPair++;
                     if (countPair == 8) {
                         Toast.makeText(GameActivity.this, "You Win!", Toast.LENGTH_LONG).show();
                     }
                 }
-                currentPos = -1;
+                currentPosition = -1;
             }
         }
     };
@@ -112,7 +109,6 @@ public class GameActivity extends AppCompatActivity {
         bmOptions.inPurgeable = true;
 
         return BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-
     }
 
     private static void shuffleArray(int[] array) {

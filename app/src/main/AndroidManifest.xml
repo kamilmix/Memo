@@ -33,10 +33,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".PhotosActivity" />
         <activity android:name=".GameActivity" />
-        <activity android:name=".MemoryGame" />
-        <activity android:name=".PlayActivity"></activity>
     </application>
 
 </manifest>
